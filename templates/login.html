@@ -59,9 +59,11 @@
     </div>
 
     <script>
+        // API Base URL - Automatically detects if running locally or on production
         const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8000'
             ? 'http://127.0.0.1:8000'
             : '';
+
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         const showRegister = document.getElementById('showRegister');
@@ -113,11 +115,8 @@
                 if (response.ok) {
                     const data = await response.json();
                     localStorage.setItem('token', data.access_token);
-                    if (window.location.port === '8000') {
-                        window.location.href = '/dashboard';
-                    } else {
-                        window.location.href = '/templates/dashboard.html';
-                    }
+                    // ALWAYS redirect to the dashboard route
+                    window.location.href = '/dashboard';
                 } else {
                     alert('Login failed: Incorrect User ID or Password');
                     btn.innerText = originalText;
@@ -147,9 +146,6 @@
                 email: email,
                 password: password
             };
-
-            console.log("Sending payload:", payload);
-            console.log("API URL:", `${API_BASE}/register`);
 
             try {
                 const response = await fetch(`${API_BASE}/register`, {
