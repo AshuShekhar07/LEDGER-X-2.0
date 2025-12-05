@@ -1,0 +1,275 @@
+:root {
+    /* 1. Base Background Shades */
+    --primary-bg: #050607;
+    --sidebar-bg: #063B3A;
+    --border-tint: rgba(255, 255, 255, 0.03);
+    --panel-tint: rgba(255, 255, 255, 0.02);
+
+    /* 2. Core Teal Shades */
+    --primary-teal: #0AA39A;
+    --teal-hover: #17B9B0;
+    --bright-aqua: #3ED5C9;
+    --dark-teal-shadow: #064847;
+
+    /* 3. Gradient Colors */
+    --teal-gradient: linear-gradient(90deg, #0AA39A, #17B9B0);
+    --teal-glow-gradient: linear-gradient(90deg, #17B9B0, #3ED5C9);
+    --sidebar-gradient: linear-gradient(180deg, #063B3A 0%, rgba(6, 59, 58, 0.85) 100%);
+    --card-tint-gradient: linear-gradient(180deg, rgba(10, 163, 154, 0.08), rgba(255, 255, 255, 0.01));
+
+    /* 4. Text Colors */
+    --primary-text: #FFFFFF;
+    --muted-text: #A8B0B7;
+    --teal-highlight: #3ED5C9;
+    --teal-label: #CFEFEA;
+
+    /* 5. Functional Colors */
+    --income-text: #3ED5C9;
+    --expense-red: #E74C3C;
+    --negative-bg: rgba(231, 76, 60, 0.05);
+
+    /* 6. Neutral Grey Shades */
+    --steel-grey: #1A1F24;
+    --muted-grey: #A8B0B7;
+}
+
+body {
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+    font-family: 'Inter', sans-serif;
+    /* Ensure Inter is loaded in HTML */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Utilities */
+.text-teal {
+    color: var(--primary-teal) !important;
+}
+
+.text-highlight {
+    color: var(--teal-highlight) !important;
+}
+
+.text-muted {
+    color: var(--muted-text) !important;
+}
+
+.text-label {
+    color: var(--teal-label) !important;
+}
+
+.bg-sidebar {
+    background: var(--sidebar-gradient);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 5px rgba(10, 163, 154, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(10, 163, 154, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(10, 163, 154, 0.2);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Buttons */
+.btn-teal {
+    background: var(--teal-gradient);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-teal:hover {
+    background: var(--teal-glow-gradient);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(10, 163, 154, 0.4);
+    color: #fff;
+}
+
+.btn-teal:active {
+    transform: translateY(0);
+}
+
+/* Cards */
+.card-custom {
+    background: var(--card-tint-gradient);
+    border: 1px solid var(--border-tint);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Inputs */
+.form-control-dark {
+    background-color: var(--steel-grey);
+    border: 1px solid var(--border-tint);
+    color: var(--primary-text);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control-dark:focus {
+    background-color: var(--steel-grey);
+    border-color: var(--primary-teal);
+    color: var(--primary-text);
+    box-shadow: 0 0 0 4px rgba(10, 163, 154, 0.15);
+    outline: none;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--teal-label);
+}
+
+/* Login Page Specifics */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 80% 20%, #063B3A 0%, #050607 60%);
+    position: relative;
+}
+
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    background: var(--primary-teal);
+    filter: blur(150px);
+    opacity: 0.15;
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 48px;
+    background: rgba(6, 59, 58, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 1;
+    position: relative;
+}
+
+.login-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--teal-glow-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Dashboard Specifics */
+.sidebar {
+    background: var(--sidebar-gradient);
+    min-height: 100vh;
+    border-right: 1px solid var(--border-tint);
+}
+
+.nav-link {
+    color: var(--muted-text);
+    transition: all 0.3s ease;
+    padding: 10px 30px;
+    border-radius: 8px;
+    margin: 0 10px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.nav-link:hover {
+    color: var(--teal-highlight);
+    border-color: rgba(62, 213, 201, 0.3);
+    background: rgba(62, 213, 201, 0.05);
+}
+
+.nav-link.active {
+    color: var(--primary-teal);
+    border-color: var(--primary-teal);
+    background: rgba(10, 163, 154, 0.1);
+    box-shadow: 0 0 15px rgba(10, 163, 154, 0.2);
+}
+
+.profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.dropdown-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+
+
+
+/* Placeholder Styling */
+::placeholder {
+    color: var(--muted-text) !important;
+    opacity: 0.7;
+}
+
+:-ms-input-placeholder {
+    color: var(--muted-text) !important;
+    opacity: 0.7;
+}
+
+::-ms-input-placeholder {
+    color: var(--muted-text) !important;
+    opacity: 0.7;
+}

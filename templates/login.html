@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Finance Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="./index.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <h2 class="login-title">LedgerX</h2>
+
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="username" class="form-label">User ID</label>
+                    <input type="text" class="form-control form-control-dark" id="username"
+                        placeholder="Enter your unique ID" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control form-control-dark" id="password"
+                        placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-teal w-100 mb-4">Sign In</button>
+                <div class="text-center">
+                    <p class="text-muted mb-0">New here? <a href="#" id="showRegister" class="text-highlight fw-bold"
+                            style="text-decoration: none;">Create an account</a></p>
+                </div>
+            </form>
+
+            <form id="registerForm" style="display: none;">
+                <div class="mb-4">
+                    <label for="regUsername" class="form-label">Choose User ID</label>
+                    <input type="text" class="form-control form-control-dark" id="regUsername"
+                        placeholder="Create a unique ID" required>
+                </div>
+                <div class="mb-4">
+                    <label for="regEmail" class="form-label">Email Address</label>
+                    <input type="email" class="form-control form-control-dark" id="regEmail"
+                        placeholder="Enter your email" required>
+                </div>
+                <div class="mb-4">
+                    <label for="regPassword" class="form-label">Password</label>
+                    <input type="password" class="form-control form-control-dark" id="regPassword"
+                        placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="btn btn-teal w-100 mb-4">Register</button>
+                <div class="text-center">
+                    <p class="text-muted mb-0">Already have an ID? <a href="#" id="showLogin"
+                            class="text-highlight fw-bold" style="text-decoration: none;">Sign In</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.port === '8000' ? '' : 'http://127.0.0.1:8000';
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginCard = document.querySelector('.login-card');
+
+        function switchForm(hide, show) {
+            loginCard.style.opacity = '0';
+            loginCard.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                hide.style.display = 'none';
+                show.style.display = 'block';
+                loginCard.style.opacity = '1';
+                loginCard.style.transform = 'translateY(0)';
+            }, 300);
+        }
+
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchForm(loginForm, registerForm);
+        });
+
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchForm(registerForm, loginForm);
+        });
+
+        // Add transition style to card for smooth switching
+        loginCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = loginForm.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Signing In...';
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+
+            try {
+                const response = await fetch(`${API_BASE}/token`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.access_token);
+                    if (window.location.port === '8000') {
+                        window.location.href = '/dashboard';
+                    } else {
+                        window.location.href = '/templates/dashboard.html';
+                    }
+                } else {
+                    alert('Login failed: Incorrect User ID or Password');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please check if the backend server is running.');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = registerForm.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Registering...';
+            btn.disabled = true;
+
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            const payload = {
+                username: username,
+                email: email,
+                password: password
+            };
+
+            console.log("Sending payload:", payload);
+            console.log("API URL:", `${API_BASE}/register`);
+
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    switchForm(registerForm, loginForm);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                } else {
+                    const data = await response.json().catch(() => null);
+                    const message = data?.detail || 'Registration failed';
+                    alert(message);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please check if the backend server is running.');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

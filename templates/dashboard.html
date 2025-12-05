@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LedgerX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./index.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="container-fluid d-flex align-items-center py-3 position-relative">
+            <h3 class="text-teal mb-0 position-absolute start-50 translate-middle-x">LEDGERX</h3>
+            <div class="dropdown ms-auto">
+                <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown">
+                    <img src="/static/icons/user-circle.svg" alt="Profile" class="profile-icon">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-dark">
+                    <li><a class="dropdown-item" href="#" onclick="showProfile()"> Profile</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="logout()"><img src="/static/icons/logout.png"
+                                class="dropdown-icon"> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="container">
+            <ul class="nav nav-pills justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" data-section="home" href="#home">
+                        <img src="" class="nav-icon"> HOME
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="history" href="#history">
+                        <img src="" class="nav-icon"> HISTORY
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="budget" href="#budget">
+                        <img src="" class="nav-icon"> BUDGET
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid p-4">
+        <!-- Home Section -->
+        <div id="homeSection" class="content-section">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <button class="btn btn-success w-100 mb-2" data-bs-toggle="modal"
+                        data-bs-target="#newTransactionModal" data-type="Income">
+                        + New Income
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-danger w-100 mb-2" data-bs-toggle="modal"
+                        data-bs-target="#newTransactionModal" data-type="Expense">
+                        + New Expense
+                    </button>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card-custom">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="text-teal mb-0">Monthly Overview</h5>
+                            <select id="monthSelector" class="form-select form-select-sm form-control-dark"
+                                style="width: auto;">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="summary-card">
+                                    <h6 class="text-white">Income</h6>
+                                    <h3 class="text-success" id="totalIncome">₹0.00</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="summary-card">
+                                    <h6 class="text-white">Remaining Balance</h6>
+                                    <h3 class="text-white" id="balance">₹0.00</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="summary-card">
+                                    <h6 class="text-white">Expenses</h6>
+                                    <h3 class="text-danger" id="totalExpenses">₹0.00</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card-custom">
+                        <h5 class="text-teal mb-3">Monthly Expenses</h5>
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <h5 class="text-teal mb-3">Expense by Category</h5>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div id="historySection" class="content-section" style="display: none;">
+            <div class="card-custom">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-teal mb-0">TRANSACTION HISTORY</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-teal me-2" data-bs-toggle="modal"
+                            data-bs-target="#importModal">
+                            <img src="/static/icons/import.svg" class="btn-icon"> Import
+                        </button>
+                        <button class="btn btn-sm btn-outline-teal" onclick="exportCSV()">
+                            <img src="/static/icons/export.svg" class="btn-icon"> Export CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Section -->
+        <div id="budgetSection" class="content-section" style="display: none;">
+            <div class="text-center mb-4">
+                <h4 class="text-teal">BUDGET OVERVIEW</h4>
+            </div>
+
+            <!-- Row 1: Status & Settings -->
+            <div class="row g-4 mb-4">
+                <!-- Budget Status (Left) -->
+                <div class="col-md-6">
+                    <div class="card-custom h-100">
+                        <h5 class="text-teal mb-4">Budget Status</h5>
+                        <div style="height: 300px; display: flex; justify-content: center;">
+                            <canvas id="budgetPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Settings (Right) -->
+                <div class="col-md-6">
+                    <div class="card-custom h-100">
+                        <h5 class="text-teal mb-4">Budget Settings</h5>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label text-white">Select Month</label>
+                                <select id="budgetMonthSelector" class="form-select form-control-dark"></select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-white">Monthly Budget</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-muted">₹</span>
+                                    <input type="number" id="budgetAmount" class="form-control form-control-dark"
+                                        placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-teal w-100" onclick="saveBudget()">Set Budget</button>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4 pt-4 border-top border-secondary">
+                            <div class="col-4 text-center">
+                                <span class="d-block text-muted mb-1" style="font-size: 0.9rem;">Income</span>
+                                <span class="h5 text-success" id="budgetIncome">₹0.00</span>
+                            </div>
+                            <div class="col-4 text-center">
+                                <span class="d-block text-muted mb-1" style="font-size: 0.9rem;">Budget</span>
+                                <span class="h5 text-white" id="currentBudget">₹0.00</span>
+                            </div>
+                            <div class="col-4 text-center">
+                                <span class="d-block text-muted mb-1" style="font-size: 0.9rem;">Remaining</span>
+                                <span class="h5 text-teal" id="remainingBudget">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="progress bg-dark mt-4" style="height: 10px;">
+                            <div id="budgetProgress" class="progress-bar bg-teal" role="progressbar" style="width: 0%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Daily Spending -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <h5 class="text-teal mb-4">Daily Spending</h5>
+                        <div style="height: 300px;">
+                            <canvas id="dailySpendingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Transaction Modal -->
+    <div class="modal fade" id="newTransactionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-teal" id="transactionModalTitle">New Transaction</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transactionForm">
+                        <input type="hidden" id="transactionType">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Date</label>
+                            <input type="date" class="form-control form-control-dark" id="transactionDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Amount</label>
+                            <input type="number" step="0.01" class="form-control form-control-dark"
+                                id="transactionAmount" placeholder="Enter amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Description</label>
+                            <input type="text" class="form-control form-control-dark" id="transactionDescription"
+                                placeholder="Add a description">
+                        </div>
+                        <div class="mb-3" id="categoryGroup">
+                            <label class="form-label text-muted">Category</label>
+                            <select class="form-select form-control-dark" id="transactionCategory">
+                                <option value="Travel">Travel</option>
+                                <option value="Food">Food</option>
+                                <option value="Bills">Bills</option>
+                                <option value="Miscellaneous">Miscellaneous</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-teal w-100">Save Transaction</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div class="modal fade" id="editTransactionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-teal">Edit Transaction</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editTransactionForm">
+                        <input type="hidden" id="editTransactionId">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Date</label>
+                            <input type="date" class="form-control form-control-dark" id="editDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Amount</label>
+                            <input type="number" step="0.01" class="form-control form-control-dark" id="editAmount"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Category</label>
+                            <select class="form-select form-control-dark" id="editCategory">
+                                <option value="Travel">Travel</option>
+                                <option value="Food">Food</option>
+                                <option value="Bills">Bills</option>
+                                <option value="Miscellaneous">Miscellaneous</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Description</label>
+                            <input type="text" class="form-control form-control-dark" id="editDescription">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-teal flex-grow-1">Update Expense</button>
+                            <button type="button" class="btn btn-danger" onclick="deleteTransaction()">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import CSV Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-teal">Import CSV</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Select CSV File</label>
+                        <input type="file" class="form-control form-control-dark" id="csvFile" accept=".csv">
+                        <small class="text-muted">Expected format: date, amount, category, type, description</small>
+                    </div>
+                    <button class="btn btn-teal w-100" onclick="importCSV()">Import</button>
+                    <div id="importResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-teal">User Profile</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="/static/icons/user-circle.svg" alt="Profile" class="profile-icon mb-3"
+                        style="width: 64px; height: 64px;">
+                    <h4 id="profileUsername" class="text-white mb-1"></h4>
+                    <p id="profileEmail" class="text-muted mb-4"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+
+</html>
