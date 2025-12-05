@@ -326,11 +326,7 @@ async function showProfile() {
 
 function logout() {
     localStorage.removeItem('token');
-    if (window.location.port === '8000') {
-        window.location.href = '/';
-    } else {
-        window.location.href = '/templates/login.html';
-    }
+    window.location.href = '/';
 }
 
 // Budget
