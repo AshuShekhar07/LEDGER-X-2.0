@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Float, Date
+from sqlalchemy import Integer, String, Float, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from database import Base
 import datetime
@@ -13,6 +13,7 @@ class Finance(Base):
     description: Mapped[str] = mapped_column(String, nullable=True)
     category: Mapped[str] = mapped_column(String)
     date: Mapped[datetime.date] = mapped_column(Date)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
 class User(Base):
     __tablename__ = "users"
@@ -29,4 +30,4 @@ class Budget(Base):
     month: Mapped[int] = mapped_column(Integer)
     year: Mapped[int] = mapped_column(Integer)
     amount: Mapped[float] = mapped_column(Float)
-    user_id: Mapped[int] = mapped_column(Integer, nullable=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))

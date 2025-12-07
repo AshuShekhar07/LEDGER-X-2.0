@@ -115,8 +115,15 @@
                 if (response.ok) {
                     const data = await response.json();
                     localStorage.setItem('token', data.access_token);
-                    // ALWAYS redirect to the dashboard route
-                    window.location.href = '/dashboard';
+
+                    // Redirect to the Dashboard
+                    // If running on a different port (like Live Server 5500/5502), 
+                    // force redirect to the backend URL (port 8000).
+                    if (API_BASE) {
+                        window.location.href = `${API_BASE}/dashboard`;
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
                 } else {
                     alert('Login failed: Incorrect User ID or Password');
                     btn.innerText = originalText;
@@ -124,7 +131,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred. Please check if the backend server is running.');
+                alert('An error occurred. Please check if the backend server is running.\nDetails: ' + error.message);
                 btn.innerText = originalText;
                 btn.disabled = false;
             }

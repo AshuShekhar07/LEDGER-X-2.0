@@ -81,10 +81,17 @@ function setupMonthSelectors() {
 // Home Data
 async function loadHomeData() {
     try {
+        console.log("Loading Home Data...");
         // Summary
         const summaryRes = await fetch(`${API_BASE}/api/summary?month=${currentMonth}&year=${currentYear}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+
+        if (!summaryRes.ok) {
+            const err = await summaryRes.json();
+            throw new Error(err.detail || 'Failed to fetch summary');
+        }
+
         const summary = await summaryRes.json();
 
         document.getElementById('totalIncome').textContent = `₹${summary.income.toFixed(2)}`;
@@ -96,18 +103,23 @@ async function loadHomeData() {
         const yearlyRes = await fetch(`${API_BASE}/api/yearly-expenses?year=${currentYear}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const yearlyData = await yearlyRes.json();
-        renderExpenseChart(yearlyData);
+        if (yearlyRes.ok) {
+            const yearlyData = await yearlyRes.json();
+            renderExpenseChart(yearlyData);
+        }
 
         // 2. Category Distribution
         const catRes = await fetch(`${API_BASE}/api/category-expenses?month=${currentMonth}&year=${currentYear}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const catData = await catRes.json();
-        renderCategoryChart(catData);
+        if (catRes.ok) {
+            const catData = await catRes.json();
+            renderCategoryChart(catData);
+        }
 
     } catch (error) {
         console.error('Error loading home data:', error);
+        alert(`Error loading dashboard data: ${error.message}\n\nPlease check if the backend server is running and database is reset.`);
     }
 }
 

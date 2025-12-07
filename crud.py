@@ -19,21 +19,21 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(db_user)
     return db_user
 
-def create(db: Session, data: FinanceCreate):
-    finance = Finance(**data.model_dump())
+def create(db: Session, data: FinanceCreate, user_id: int):
+    finance = Finance(**data.model_dump(), user_id=user_id)
     db.add(finance)
     db.commit()
     db.refresh(finance)
     return finance
 
-def get(db: Session, category: str | None = None):
-    query = db.query(Finance)
+def get(db: Session, user_id: int, category: str | None = None):
+    query = db.query(Finance).filter(Finance.user_id == user_id)
     if category:
         query = query.filter(Finance.category == category)
     return query.all()
 
-def update(db: Session, id: int, data: FinanceCreate):
-    finance = db.query(Finance).filter(Finance.id == id).first()
+def update(db: Session, id: int, data: FinanceCreate, user_id: int):
+    finance = db.query(Finance).filter(Finance.id == id, Finance.user_id == user_id).first()
     if finance:
         for key, value in data.model_dump().items():
             setattr(finance, key, value)
@@ -41,21 +41,22 @@ def update(db: Session, id: int, data: FinanceCreate):
         db.refresh(finance)
     return finance
 
-def delete(db: Session, id: int):
-    finance = db.query(Finance).filter(Finance.id == id).first()
+def delete(db: Session, id: int, user_id: int):
+    finance = db.query(Finance).filter(Finance.id == id, Finance.user_id == user_id).first()
     if finance:
         db.delete(finance)
         db.commit()
         return True
     return False
 
-def get_monthly_summary(db: Session, month: int, year: int):
+def get_monthly_summary(db: Session, month: int, year: int, user_id: int):
     # Calculate start and end date of the month
     _, last_day = calendar.monthrange(year, month)
     start_date = date(year, month, 1)
     end_date = date(year, month, last_day)
     
     transactions = db.query(Finance).filter(
+        Finance.user_id == user_id,
         Finance.date >= start_date,
         Finance.date <= end_date
     ).all()
@@ -71,7 +72,7 @@ def get_monthly_summary(db: Session, month: int, year: int):
         "balance": income - expenses
     }
 
-def get_category_expenses(db: Session, month: int, year: int):
+def get_category_expenses(db: Session, month: int, year: int, user_id: int):
     # Calculate start and end date of the month
     _, last_day = calendar.monthrange(year, month)
     start_date = date(year, month, 1)
@@ -81,6 +82,7 @@ def get_category_expenses(db: Session, month: int, year: int):
         Finance.category,
         func.sum(Finance.expenses).label('total')
     ).filter(
+        Finance.user_id == user_id,
         Finance.date >= start_date,
         Finance.date <= end_date,
         Finance.expenses > 0
@@ -88,9 +90,10 @@ def get_category_expenses(db: Session, month: int, year: int):
     
     return [{"category": r[0], "amount": r[1]} for r in results]
 
-def create_budget(db: Session, budget: BudgetCreate):
+def create_budget(db: Session, budget: BudgetCreate, user_id: int):
     # Check if budget exists for this month/year
     existing = db.query(Budget).filter(
+        Budget.user_id == user_id,
         Budget.month == budget.month,
         Budget.year == budget.year
     ).first()
@@ -101,19 +104,20 @@ def create_budget(db: Session, budget: BudgetCreate):
         db.refresh(existing)
         return existing
     
-    db_budget = Budget(**budget.model_dump())
+    db_budget = Budget(**budget.model_dump(), user_id=user_id)
     db.add(db_budget)
     db.commit()
     db.refresh(db_budget)
     return db_budget
 
-def get_budget(db: Session, month: int, year: int):
+def get_budget(db: Session, month: int, year: int, user_id: int):
     return db.query(Budget).filter(
+        Budget.user_id == user_id,
         Budget.month == month,
         Budget.year == year
     ).first()
 
-def get_daily_spending(db: Session, month: int, year: int):
+def get_daily_spending(db: Session, month: int, year: int, user_id: int):
     _, last_day = calendar.monthrange(year, month)
     start_date = date(year, month, 1)
     end_date = date(year, month, last_day)
@@ -122,6 +126,7 @@ def get_daily_spending(db: Session, month: int, year: int):
         Finance.date,
         func.sum(Finance.expenses).label('total')
     ).filter(
+        Finance.user_id == user_id,
         Finance.date >= start_date,
         Finance.date <= end_date,
         Finance.expenses > 0
@@ -142,11 +147,12 @@ def get_daily_spending(db: Session, month: int, year: int):
         
     return final_data
 
-def get_yearly_expenses(db: Session, year: int):
+def get_yearly_expenses(db: Session, year: int, user_id: int):
     results = db.query(
         extract('month', Finance.date).label('month'),
         func.sum(Finance.expenses).label('total')
     ).filter(
+        Finance.user_id == user_id,
         extract('year', Finance.date) == year,
         Finance.expenses > 0
     ).group_by('month').all()
