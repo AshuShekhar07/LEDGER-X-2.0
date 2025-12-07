@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from database import engine, SessionLocal
-from models import Base, User, Budget
+from models import Base, User, Budget, Finance
 from schemas import FinanceCreate, FinanceResponse, UserCreate, UserResponse, BudgetCreate, BudgetResponse
 import crud
 from sqlalchemy.orm import Session
