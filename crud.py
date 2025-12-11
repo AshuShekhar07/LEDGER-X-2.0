@@ -11,6 +11,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
+
 def create_user(db: Session, user: UserCreate):
     hashed_password = pwd_context.hash(user.password)
     db_user = User(username=user.username, email=user.email, hashed_password=hashed_password)
@@ -167,3 +170,14 @@ def get_yearly_expenses(db: Session, year: int, user_id: int):
         })
         
     return final_data
+
+def get_yearly_spending_trend(db: Session, user_id: int):
+    results = db.query(
+        extract('year', Finance.date).label('year'),
+        func.sum(Finance.expenses).label('total')
+    ).filter(
+        Finance.user_id == user_id,
+        Finance.expenses > 0
+    ).group_by('year').order_by('year').all()
+    
+    return [{"year": int(r[0]), "amount": r[1]} for r in results]

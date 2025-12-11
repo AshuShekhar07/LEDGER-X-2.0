@@ -88,6 +88,11 @@ async function loadHomeData() {
         });
 
         if (!summaryRes.ok) {
+            if (summaryRes.status === 401) {
+                alert("Session expired. Please login again.");
+                logout();
+                return;
+            }
             const err = await summaryRes.json();
             throw new Error(err.detail || 'Failed to fetch summary');
         }
@@ -116,6 +121,9 @@ async function loadHomeData() {
             const catData = await catRes.json();
             renderCategoryChart(catData);
         }
+
+        // 3. Yearly Trend
+        loadYearlyTrendData();
 
     } catch (error) {
         console.error('Error loading home data:', error);
@@ -230,11 +238,7 @@ async function saveTransaction(e) {
     const dateVal = document.getElementById('transactionDate').value;
     const selectedDate = new Date(dateVal);
 
-    // Strict Month Validation
-    if (selectedDate.getMonth() + 1 !== currentMonth || selectedDate.getFullYear() !== currentYear) {
-        alert(`Please select a date in ${document.getElementById('monthSelector').options[currentMonth - 1].text} ${currentYear}`);
-        return;
-    }
+    // Removed strict month/year validation to allow any date
 
     const type = document.getElementById('transactionType').value;
     const amount = parseFloat(document.getElementById('transactionAmount').value);
@@ -263,6 +267,9 @@ async function saveTransaction(e) {
             e.target.reset();
             loadHomeData();
             loadHistory(); // Refresh history if open
+        } else if (res.status === 401) {
+            alert("Session expired. Please login again.");
+            logout();
         }
     } catch (error) {
         console.error('Error saving transaction:', error);
@@ -271,13 +278,29 @@ async function saveTransaction(e) {
 
 async function loadHistory() {
     try {
+        console.log("Loading History...");
         const res = await fetch(`${API_BASE}/ledger/`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const data = await res.json();
 
+        if (!res.ok) {
+            if (res.status === 401) {
+                alert("Session expired. Please login again.");
+                logout();
+                return;
+            }
+            console.error("Failed to load history:", res.status);
+            return;
+        }
+
+        const data = await res.json();
         const tbody = document.getElementById('transactionsTable');
         tbody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No transactions found.</td></tr>';
+            return;
+        }
 
         // Sort by date desc
         data.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -288,13 +311,13 @@ async function loadHistory() {
             tr.innerHTML = `
                 <td>${t.date}</td>
                 <td class="${isIncome ? 'text-success' : 'text-danger'}">
-                    ${isIncome ? '+' : '-'}₹${(isIncome ? t.salary : t.expenses).toFixed(2)}
+                    ${isIncome ? '+' : '-'}₹${(isIncome ? t.salary : t.expenses).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </td>
-                <td>${t.category}</td>
+                <td><span class="${isIncome ? 'text-white' : 'text-white'}">${t.category}</span></td>
                 <td>${t.description || '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editTransaction(${t.id})">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction(${t.id})">Delete</button>
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editTransaction(${t.id})" style="min-width: 60px;">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction(${t.id})" style="min-width: 60px;">Delete</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -343,6 +366,7 @@ function logout() {
 
 // Budget
 async function loadBudgetData() {
+    console.log("Loading Budget Data...");
     try {
         // 1. Get Budget Settings
         const budgetRes = await fetch(`${API_BASE}/api/budget?month=${currentMonth}&year=${currentYear}`, {
@@ -358,13 +382,25 @@ async function loadBudgetData() {
             } else {
                 document.getElementById('budgetAmount').value = '';
             }
+        } else if (budgetRes.status === 401) {
+            alert("Session expired. Please login again.");
+            logout();
+            return;
         }
 
         // 2. Get Summary for calculations
         const summaryRes = await fetch(`${API_BASE}/api/summary?month=${currentMonth}&year=${currentYear}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const summary = await summaryRes.json();
+
+        let summary = { expenses: 0, income: 0, balance: 0 };
+        if (summaryRes.ok) {
+            summary = await summaryRes.json();
+        } else if (summaryRes.status === 401) {
+            alert("Session expired. Please login again.");
+            logout();
+            return;
+        }
 
         // 3. Calculate Status
         const totalExpenses = summary.expenses;
@@ -374,7 +410,7 @@ async function loadBudgetData() {
         document.getElementById('budgetIncome').textContent = `₹${summary.income.toFixed(2)}`;
         document.getElementById('currentBudget').textContent = `₹${budgetAmount.toFixed(2)}`;
         document.getElementById('remainingBudget').textContent = `₹${remaining.toFixed(2)}`;
-        document.getElementById('remainingBudget').className = `h4 ${remaining >= 0 ? 'text-teal' : 'text-danger'}`;
+        document.getElementById('remainingBudget').className = `h5 ${remaining >= 0 ? 'text-teal' : 'text-danger'}`;
 
         const progressBar = document.getElementById('budgetProgress');
         progressBar.style.width = `${Math.min(progress, 100)}%`;
@@ -390,6 +426,9 @@ async function loadBudgetData() {
         if (dailyRes.ok) {
             const dailyData = await dailyRes.json();
             renderDailySpendingChart(dailyData);
+        } else if (dailyRes.status === 401) {
+            // Already handled above likely, but good to be safe
+            return;
         }
 
     } catch (error) {
@@ -480,6 +519,119 @@ function renderDailySpendingChart(data) {
             scales: {
                 y: { beginAtZero: true, ticks: { color: '#fff' } },
                 x: { ticks: { color: '#fff' } }
+            }
+        }
+    });
+}
+
+
+
+async function loadYearlyTrendData() {
+    try {
+        const res = await fetch(`${API_BASE}/api/yearly-spending-trend`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderYearlyTrendChart(data);
+        }
+    } catch (error) {
+        console.error('Error loading yearly trend:', error);
+    }
+}
+
+// Yearly Trend Chart
+let yearlyTrendChart = null;
+
+function renderYearlyTrendChart(data) {
+    const canvas = document.getElementById('yearlyTrendChart');
+    const container = canvas.parentElement;
+
+    // Check for existing "no data" message and remove it
+    const existingMsg = container.querySelector('.no-data-message');
+    if (existingMsg) existingMsg.remove();
+
+    if (!data || data.length === 0) {
+        canvas.style.display = 'none';
+        const msg = document.createElement('div');
+        msg.className = 'no-data-message d-flex justify-content-center align-items-center h-100 text-muted';
+        msg.innerText = 'No yearly data available yet.';
+        container.appendChild(msg);
+        return;
+    }
+
+    canvas.style.display = 'block';
+    const ctx = canvas.getContext('2d');
+
+    if (yearlyTrendChart) {
+        yearlyTrendChart.destroy();
+    }
+
+    yearlyTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.year),
+            datasets: [{
+                label: 'Total Expenses',
+                data: data.map(d => d.amount),
+                borderColor: '#0AA39A',
+                backgroundColor: 'rgba(10, 163, 154, 0.1)',
+                borderWidth: 3,
+                tension: 0.4, // Smooth curve
+                fill: true,
+                pointStyle: 'circle',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#0AA39A',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#0AA39A',
+                    bodyColor: '#fff',
+                    padding: 10,
+                    callbacks: {
+                        label: function (context) {
+                            return ` Total Expenses: ₹${context.raw.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        callback: function (value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)',
+                        borderDash: [5, 5]
+                    },
+                    border: { display: false }
+                },
+                x: {
+                    ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                    grid: { display: false },
+                    border: { display: false }
+                }
             }
         }
     });
