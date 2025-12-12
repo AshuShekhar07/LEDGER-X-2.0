@@ -11,11 +11,10 @@
 </head>
 
 <body>
-    <div class="ambient-glow"></div>
     <!-- Header -->
     <header class="dashboard-header">
         <div class="container-fluid d-flex align-items-center py-3 position-relative">
-            <h3 class="brand-title mb-0 position-absolute start-50 translate-middle-x">LEDGERX</h3>
+            <h3 class="text-teal mb-0 position-absolute start-50 translate-middle-x">LEDGERX</h3>
             <div class="dropdown ms-auto">
                 <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown">
                     <img src="/static/icons/user-circle.svg" alt="Profile" class="profile-icon">
@@ -58,20 +57,18 @@
         <div id="homeSection" class="content-section">
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <button class="btn btn-success w-100 mb-2" data-bs-toggle="modal"
+                    <button class="btn btn-white-blue w-100 mb-2" data-bs-toggle="modal"
                         data-bs-target="#newTransactionModal" data-type="Income">
                         + New Income
                     </button>
                 </div>
                 <div class="col-md-6">
-                    <button class="btn btn-danger w-100 mb-2" data-bs-toggle="modal"
+                    <button class="btn btn-white-blue w-100 mb-2" data-bs-toggle="modal"
                         data-bs-target="#newTransactionModal" data-type="Expense">
                         + New Expense
                     </button>
                 </div>
             </div>
-
-
 
             <div class="row mb-4">
                 <div class="col-md-12">
@@ -120,15 +117,14 @@
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <!-- Moved Yearly Trend Chart Here -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card-custom">
-                            <h5 class="text-teal mb-3">Yearly Spending Trend</h5>
-                            <div style="height: 300px;">
-                                <canvas id="yearlyTrendChart"></canvas>
-                            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <h5 class="text-teal mb-3">Yearly Spending Trend</h5>
+                        <div style="height: 300px;">
+                            <canvas id="yearlyTrendChart"></canvas>
                         </div>
                     </div>
                 </div>

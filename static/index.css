@@ -1,40 +1,56 @@
 :root {
     /* 1. Base Background Shades */
-    --primary-bg: #050607;
-    --sidebar-bg: #063B3A;
-    --border-tint: rgba(255, 255, 255, 0.03);
-    --panel-tint: rgba(255, 255, 255, 0.02);
+    --primary-bg: #02040A;
+    /* Deep Navy Black */
+    --sidebar-bg: #050A14;
+    /* Slightly lighter Navy */
+    --border-tint: rgba(26, 53, 144, 0.3);
+    /* Indigo Tint */
+    --panel-tint: rgba(10, 15, 29, 0.6);
 
-    /* 2. Core Teal Shades */
-    --primary-teal: #0AA39A;
-    --teal-hover: #17B9B0;
-    --bright-aqua: #3ED5C9;
-    --dark-teal-shadow: #064847;
+    /* 2. Core Accent Colors */
+    --primary-teal: #2160FF;
+    /* NEON BLUE (replaces Teal) */
+    --teal-hover: #3B62FF;
+    /* Vivid Blue Hover */
+    --bright-aqua: #254AFF;
+    /* Electric Blue Glow */
+    --dark-teal-shadow: #0C1A3A;
+    /* Depth Blue */
 
     /* 3. Gradient Colors */
-    --teal-gradient: linear-gradient(90deg, #0AA39A, #17B9B0);
-    --teal-glow-gradient: linear-gradient(90deg, #17B9B0, #3ED5C9);
-    --sidebar-gradient: linear-gradient(180deg, #063B3A 0%, rgba(6, 59, 58, 0.85) 100%);
-    --card-tint-gradient: linear-gradient(180deg, rgba(10, 163, 154, 0.08), rgba(255, 255, 255, 0.01));
+    --teal-gradient: linear-gradient(90deg, #2160FF, #3B62FF);
+    --teal-glow-gradient: linear-gradient(90deg, #1E45F9, #4267FF);
+    --sidebar-gradient: linear-gradient(180deg, #08142A 0%, #050A14 100%);
+    /* Midnight Blue to Navy */
+    --card-tint-gradient: linear-gradient(180deg, #0A0F1D, #0B1122);
+    /* Dark Gradient Box */
 
     /* 4. Text Colors */
     --primary-text: #FFFFFF;
-    --muted-text: #A8B0B7;
-    --teal-highlight: #3ED5C9;
-    --teal-label: #CFEFEA;
+    --muted-text: #DCE0ED;
+    /* Light Gray-Blue */
+    --teal-highlight: #3B62FF;
+    --teal-label: #4A5270;
+    /* Soft Gray-Blue Label */
 
     /* 5. Functional Colors */
-    --income-text: #3ED5C9;
+    --income-text: #2160FF;
+    /* Neon Blue for Income */
     --expense-red: #E74C3C;
     --negative-bg: rgba(231, 76, 60, 0.05);
 
-    /* 6. Neutral Grey Shades */
-    --steel-grey: #1A1F24;
-    --muted-grey: #A8B0B7;
+    /* 6. Neutral Shades */
+    --steel-grey: #0C1E45;
+    /* Dark Royal Blue (Input bg) */
+    --muted-grey: #3A4260;
 }
 
 body {
-    background: radial-gradient(circle at 80% 20%, #063B3A 0%, #050607 60%);
+    background: #02040A;
+    /* Deep Navy Black */
+    background-image: radial-gradient(circle at 50% -20%, #142B6A 0%, #02040A 70%);
+    /* Top center glow */
     color: var(--primary-text);
     font-family: 'Inter', sans-serif;
     margin: 0;
@@ -42,21 +58,20 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
-    /* For glow positioning */
 }
 
 .ambient-glow {
     position: fixed;
     top: 20%;
     left: 10%;
-    width: 300px;
-    height: 300px;
-    background: var(--primary-teal);
-    filter: blur(150px);
-    opacity: 0.15;
+    width: 400px;
+    height: 400px;
+    background: #421E8C;
+    /* Deep Purple Glow */
+    filter: blur(180px);
+    opacity: 0.25;
     border-radius: 50%;
     z-index: -1;
-    /* Behind content */
     pointer-events: none;
 }
 
@@ -81,23 +96,24 @@ body {
     background: var(--sidebar-gradient);
 }
 
-/* Tables - Override Bootstrap table-dark */
+/* Tables */
 .table-dark {
     --bs-table-bg: transparent;
-    --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+    --bs-table-striped-bg: rgba(33, 96, 255, 0.02);
     --bs-table-striped-color: #fff;
-    --bs-table-active-bg: rgba(10, 163, 154, 0.1);
+    --bs-table-active-bg: rgba(33, 96, 255, 0.1);
     --bs-table-active-color: #fff;
-    --bs-table-hover-bg: rgba(10, 163, 154, 0.05);
+    --bs-table-hover-bg: rgba(33, 96, 255, 0.05);
     --bs-table-hover-color: #fff;
     color: #fff;
     border-color: var(--border-tint);
 }
 
 .table-dark th {
-    color: var(--teal-label);
+    color: var(--muted-text);
+    /* UPDATED: Better visibility than label color */
     font-weight: 600;
-    border-bottom: 2px solid rgba(10, 163, 154, 0.3);
+    border-bottom: 2px solid rgba(33, 96, 255, 0.3);
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
@@ -122,43 +138,33 @@ body {
     }
 }
 
-@keyframes glowPulse {
-    0% {
-        box-shadow: 0 0 5px rgba(10, 163, 154, 0.2);
-    }
-
-    50% {
-        box-shadow: 0 0 20px rgba(10, 163, 154, 0.5);
-    }
-
-    100% {
-        box-shadow: 0 0 5px rgba(10, 163, 154, 0.2);
-    }
-}
-
 .fade-in {
     animation: fadeIn 0.8s ease-out forwards;
 }
 
 /* Buttons */
 .btn-teal {
-    background: var(--teal-gradient);
+    background: var(--primary-teal);
+    /* Solid Neon Blue */
     border: none;
     color: white;
     padding: 12px 24px;
     border-radius: 8px;
+    /* Slightly sharper than pill */
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 600;
     letter-spacing: 0.5px;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 15px rgba(33, 96, 255, 0.3);
 }
 
 .btn-teal:hover {
-    background: var(--teal-glow-gradient);
+    background: var(--teal-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(10, 163, 154, 0.4);
+    box-shadow: 0 6px 25px rgba(33, 96, 255, 0.5);
+    /* Stronger Blue Glow */
     color: #fff;
 }
 
@@ -166,13 +172,40 @@ body {
     transform: translateY(0);
 }
 
+.btn-white-blue {
+    background: #ffffff;
+    color: var(--primary-teal);
+    /* Neon Blue */
+    padding: 14px 30px;
+    border-radius: 50px;
+    /* Pill Shape */
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-white-blue:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    color: var(--teal-hover);
+}
+
+.btn-white-blue:active {
+    transform: translateY(0);
+}
+
 /* Cards */
 .card-custom {
-    background: rgba(15, 20, 25, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: var(--card-tint-gradient);
+    border: 1px solid var(--border-tint);
+    border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     height: 100%;
 }
 
@@ -206,7 +239,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 80% 20%, #063B3A 0%, #050607 60%);
+    background: #02040A;
+    /* Deep Navy Black */
+    background-image: radial-gradient(circle at 80% 20%, #142B6A 0%, #02040A 60%);
     position: relative;
 }
 
@@ -217,24 +252,24 @@ body {
     left: 10%;
     width: 300px;
     height: 300px;
-    background: var(--primary-teal);
+    background: #421E8C;
+    /* Deep Purple Glow */
     filter: blur(150px);
-    opacity: 0.15;
+    opacity: 0.3;
     border-radius: 50%;
     z-index: 0;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .login-card {
     width: 100%;
     max-width: 400px;
     padding: 40px;
-    background: #021a1a;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #0A0F1D;
+    /* Dark Gradient Box Base */
+    background: linear-gradient(180deg, #0A0F1D, #0B1122);
+    border: 1px solid var(--border-tint);
     border-radius: 20px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     z-index: 1;
     position: relative;
 }

@@ -136,9 +136,6 @@ function renderExpenseChart(data) {
     const ctx = document.getElementById('expenseChart').getContext('2d');
     if (expenseChart) expenseChart.destroy();
 
-    // Generate colors based on value (optional, keeping uniform teal for consistency with theme)
-    // or use different shades if requested. Using main teal color.
-
     expenseChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -146,9 +143,9 @@ function renderExpenseChart(data) {
             datasets: [{
                 label: 'Monthly Expenses',
                 data: data.map(d => d.amount),
-                backgroundColor: '#0AA39A',
+                backgroundColor: '#2160FF',
                 borderRadius: 4,
-                hoverBackgroundColor: '#0edcd0' // Glow effect on hover
+                hoverBackgroundColor: '#3B62FF'
             }]
         },
         options: {
@@ -182,7 +179,14 @@ function renderCategoryChart(data) {
     const ctx = document.getElementById('categoryChart').getContext('2d');
     if (categoryChart) categoryChart.destroy();
 
-    const colors = ['#0AA39A', '#3ED5C9', '#5DADE2', '#AF7AC5', '#F1C40F', '#E74C3C'];
+    const colorMap = {
+        'Travel': '#1976D2',
+        'Food': '#00ACC1',
+        'Bills': '#5C6BC0',
+        'Miscellaneous': '#90A4AE'
+    };
+
+    const colors = data.map(d => colorMap[d.category] || '#2160FF'); // Default to Neon Blue if unknown
 
     categoryChart = new Chart(ctx, {
         type: 'doughnut',
@@ -236,9 +240,6 @@ async function saveTransaction(e) {
     e.preventDefault();
 
     const dateVal = document.getElementById('transactionDate').value;
-    const selectedDate = new Date(dateVal);
-
-    // Removed strict month/year validation to allow any date
 
     const type = document.getElementById('transactionType').value;
     const amount = parseFloat(document.getElementById('transactionAmount').value);
@@ -476,7 +477,7 @@ function renderBudgetPieChart(spent, remaining) {
             labels: ['Spent', 'Remaining'],
             datasets: [{
                 data: [spent, remaining],
-                backgroundColor: ['#dc3545', '#0AA39A'],
+                backgroundColor: ['#E74C3C', '#2160FF'],
                 borderWidth: 0
             }]
         },
@@ -508,7 +509,7 @@ function renderDailySpendingChart(data) {
             datasets: [{
                 label: 'Daily Spending',
                 data: data.map(d => d.amount),
-                backgroundColor: '#0AA39A',
+                backgroundColor: '#2160FF',
                 borderRadius: 3
             }]
         },
@@ -523,8 +524,6 @@ function renderDailySpendingChart(data) {
         }
     });
 }
-
-
 
 async function loadYearlyTrendData() {
     try {
@@ -574,15 +573,15 @@ function renderYearlyTrendChart(data) {
             datasets: [{
                 label: 'Total Expenses',
                 data: data.map(d => d.amount),
-                borderColor: '#0AA39A',
-                backgroundColor: 'rgba(10, 163, 154, 0.1)',
+                borderColor: '#2160FF',
+                backgroundColor: 'rgba(33, 96, 255, 0.1)',
                 borderWidth: 3,
                 tension: 0.4, // Smooth curve
                 fill: true,
                 pointStyle: 'circle',
                 pointRadius: 6,
                 pointHoverRadius: 8,
-                pointBackgroundColor: '#0AA39A',
+                pointBackgroundColor: '#2160FF',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2
             }]
@@ -602,7 +601,7 @@ function renderYearlyTrendChart(data) {
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#0AA39A',
+                    titleColor: '#2160FF',
                     bodyColor: '#fff',
                     padding: 10,
                     callbacks: {
