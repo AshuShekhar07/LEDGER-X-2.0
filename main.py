@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from database import engine, SessionLocal
 from models import Base, User, Budget, Finance
 from schemas import FinanceCreate, FinanceResponse, UserCreate, UserResponse, BudgetCreate, BudgetResponse
@@ -180,10 +180,21 @@ def get_yearly_spending_trend(db: Session = Depends(get_db), current_user: User 
     return crud.get_yearly_spending_trend(db, user_id=current_user.id)
 
 # TEMPORARY: Admin endpoint to reset DB in production
+from fastapi.responses import HTMLResponse, JSONResponse
+
+# ... (rest of imports)
+
+# ... (existing code)
+
 @app.get("/api/admin/reset-db-force")
 def reset_database_force():
-    # Drop all tables
-    Base.metadata.drop_all(bind=engine)
-    # Recreate all tables
-    Base.metadata.create_all(bind=engine)
-    return {"message": "Database has been reset successfully. All data deleted. New schema applied."}
+    try:
+        # Drop all tables
+        Base.metadata.drop_all(bind=engine)
+        # Recreate all tables
+        Base.metadata.create_all(bind=engine)
+        return {"message": "Database has been reset successfully. All data deleted. New schema applied."}
+    except Exception as e:
+        import traceback
+        print(f"Reset failed: {e}")
+        return JSONResponse(status_code=500, content={"detail": f"Reset failed: {str(e)}", "traceback": traceback.format_exc()})
