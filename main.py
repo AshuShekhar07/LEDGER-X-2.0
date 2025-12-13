@@ -13,14 +13,27 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import os
 
-Base.metadata.create_all(bind=engine)
-app = FastAPI()
 
-@app.on_event("startup")
-async def startup_event():
-    print("\n\n==================================================")
-    print(" LEDGER-X SERVER STARTED SUCCESSFULLY ")
-    print("==================================================\n\n")
+
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create tables and print logs
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("\n\n==================================================")
+        print(" LEDGER-X SERVER STARTED SUCCESSFULLY ")
+        print("==================================================\n\n")
+    except Exception as e:
+        print(f"Error during startup database initialization: {e}")
+    
+    yield
+    
+    # Shutdown: (Cleanup processing if needed usually goes here)
+    print("Shutting down...")
+
+app = FastAPI(lifespan=lifespan)
 
 SECRET_KEY = "your_secret_key_change_me_in_production"
 ALGORITHM = "HS256"
