@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from database import engine, SessionLocal
 from models import Base, User, Budget, Finance
 from schemas import FinanceCreate, FinanceResponse, UserCreate, UserResponse, BudgetCreate, BudgetResponse
@@ -13,14 +13,27 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import os
 
-Base.metadata.create_all(bind=engine)
-app = FastAPI()
 
-@app.on_event("startup")
-async def startup_event():
-    print("\n\n==================================================")
-    print(" LEDGER-X SERVER STARTED SUCCESSFULLY ")
-    print("==================================================\n\n")
+
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create tables and print logs
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("\n\n==================================================")
+        print(" LEDGER-X SERVER STARTED SUCCESSFULLY ")
+        print("==================================================\n\n")
+    except Exception as e:
+        print(f"Error during startup database initialization: {e}")
+    
+    yield
+    
+    # Shutdown: (Cleanup processing if needed usually goes here)
+    print("Shutting down...")
+
+app = FastAPI(lifespan=lifespan)
 
 SECRET_KEY = "your_secret_key_change_me_in_production"
 ALGORITHM = "HS256"
@@ -167,10 +180,21 @@ def get_yearly_spending_trend(db: Session = Depends(get_db), current_user: User 
     return crud.get_yearly_spending_trend(db, user_id=current_user.id)
 
 # TEMPORARY: Admin endpoint to reset DB in production
+from fastapi.responses import HTMLResponse, JSONResponse
+
+# ... (rest of imports)
+
+# ... (existing code)
+
 @app.get("/api/admin/reset-db-force")
 def reset_database_force():
-    # Drop all tables
-    Base.metadata.drop_all(bind=engine)
-    # Recreate all tables
-    Base.metadata.create_all(bind=engine)
-    return {"message": "Database has been reset successfully. All data deleted. New schema applied."}
+    try:
+        # Drop all tables
+        Base.metadata.drop_all(bind=engine)
+        # Recreate all tables
+        Base.metadata.create_all(bind=engine)
+        return {"message": "Database has been reset successfully. All data deleted. New schema applied."}
+    except Exception as e:
+        import traceback
+        print(f"Reset failed: {e}")
+        return JSONResponse(status_code=500, content={"detail": f"Reset failed: {str(e)}", "traceback": traceback.format_exc()})

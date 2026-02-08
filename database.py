@@ -13,12 +13,17 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
+# Fix for Render's "postgres://" URL scheme which SQLAlchemy doesn't support
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+
+# Ensure we use psycopg driver if not already specified (and not sqlite)
+if not DATABASE_URL.startswith("sqlite") and "psycopg" not in DATABASE_URL:
+     DATABASE_URL = re.sub(r'^postgresql:', 'postgresql+psycopg:', DATABASE_URL)
+
 connect_args = {}
 if "sqlite" in DATABASE_URL:
     connect_args["check_same_thread"] = False
-
-# Adjust the database URL to use the psycopg driver
-DATABASE_URL = re.sub(r'^postgresql:', 'postgresql+psycopg:', DATABASE_URL)
 
 engine = create_engine(
     DATABASE_URL, connect_args=connect_args, echo=True

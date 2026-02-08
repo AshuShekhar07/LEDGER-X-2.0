@@ -169,8 +169,17 @@
                     btn.innerText = originalText;
                     btn.disabled = false;
                 } else {
-                    const data = await response.json().catch(() => null);
-                    const message = data?.detail || 'Registration failed';
+                    let message = 'Registration failed';
+                    try {
+                        const data = await response.json();
+                        message = data.detail || message;
+                    } catch (e) {
+                        // If response is not JSON (e.g. 500/502 HTML error page)
+                        message += `\nStatus: ${response.status} ${response.statusText}`;
+                        if (response.status === 502) {
+                            message += '\n(Possible incorrectly configured Database URL or Server Crash)';
+                        }
+                    }
                     alert(message);
                     btn.innerText = originalText;
                     btn.disabled = false;
